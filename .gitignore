@@ -1,0 +1,4 @@
+sensitive.txt
+logs/
+artifact/*
+.env
