@@ -59,6 +59,12 @@ class SimpleStorageService:
         """
         # logging.info("Entered the read_object method of SimpleStorageService class")
         try:
+            # Handle case where object_name might be a list
+            if isinstance(object_name, list):
+                if len(object_name) == 0:
+                    raise Exception("No objects found in the list")
+                object_name = object_name[0]  # Take the first object
+            
             # Read and decode the object content if decode=True
             func = (
                 lambda: object_name.get()["Body"].read().decode()
@@ -89,25 +95,29 @@ class SimpleStorageService:
         except Exception as e:
             raise MyException(e, sys) from e
 
-    def get_file_object(self, filename: str, bucket_name: str) -> Union[List[object], object]:
+    def get_file_object(self, filename: str, bucket_name: str) -> object:
         """
-        Retrieves the file object(s) from the specified bucket based on the filename.
+        Retrieves the first file object from the specified bucket based on the filename.
 
         Args:
             filename (str): The name of the file to retrieve.
             bucket_name (str): The name of the S3 bucket.
 
         Returns:
-            Union[List[object], object]: The S3 file object or list of file objects.
+            object: The first S3 file object matching the filename.
         """
         logging.info("Entered the get_file_object method of SimpleStorageService class")
         try:
             bucket = self.get_bucket(bucket_name)
             file_objects = [file_object for file_object in bucket.objects.filter(Prefix=filename)]
-            func = lambda x: x[0] if len(x) == 1 else x
-            file_objs = func(file_objects)
+            
+            if len(file_objects) == 0:
+                raise Exception(f"No files found with prefix: {filename}")
+            
+            # Always return the first matching file object (not a list)
+            file_obj = file_objects[0]
             logging.info("Exited the get_file_object method of SimpleStorageService class")
-            return file_objs
+            return file_obj
         except Exception as e:
             raise MyException(e, sys) from e
 
