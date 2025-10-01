@@ -1,5 +1,4 @@
 sensitive.txt
-logs/
 artifact/*
 .env
 persistent-terminals.log
